@@ -47,7 +47,7 @@ module Readme
 
       begin
         response = HttpResponse.from_parts(status, headers, body)
-        logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
+        # logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
 
         process_response(
           response: response,
