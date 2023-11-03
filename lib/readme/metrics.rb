@@ -36,20 +36,20 @@ module Readme
       buffer_length = options[:buffer_length] || DEFAULT_BUFFER_LENGTH
       @@request_queue = options[:request_queue] || Readme::RequestQueue.new(options[:api_key], buffer_length)
       @@logger = options[:logger] || Logger.new($stdout)
-      @@logger.warn "registered Logger"
+      Readme::Metrics.logger.warn "registered Logger"
     end
 
     def call(env)
-      @@logger.warn "Beginning Call method"
+      Readme::Metrics.logger.warn "Beginning Call method"
       start_time = Time.now
       status, headers, body = @app.call(env)
       end_time = Time.now
 
       begin
         response = HttpResponse.from_parts(status, headers, body)
-        @@logger.warn "status: #{status}"
-        @@logger.warn "headers: #{headers}"
-        @@logger.warn "body: #{body}"
+        Readme::Metrics.logger.warn "status: #{status}"
+        Readme::Metrics.logger.warn "headers: #{headers}"
+        Readme::Metrics.logger.warn "body: #{body}"
 
 
         process_response(
@@ -58,14 +58,14 @@ module Readme
           start_time: start_time,
           end_time: end_time
         )
-        @@logger.warn "Processed Response"
+        Readme::Metrics.logger.warn "Processed Response"
       rescue => e
-        @@logger.warn "Beginning Rescue"
+        Readme::Metrics.logger.warn "Beginning Rescue"
         Readme::Metrics.logger.warn "The following error occured when trying to log to the ReadMe metrics API: #{e.message}. Request not logged."
         [status, headers, body]
-        @@logger.warn "status: #{status}"
-        @@logger.warn "headers: #{headers}"
-        @@logger.warn "body: #{body}"
+        Readme::Metrics.logger.warn "status: #{status}"
+        Readme::Metrics.logger.warn "headers: #{headers}"
+        Readme::Metrics.logger.warn "body: #{body}"
       end
 
       [status, headers, body]
@@ -74,15 +74,15 @@ module Readme
     private
 
     def process_response(response:, env:, start_time:, end_time:)
-      @@logger.warn "processing response"
-      @@logger.warn "#{env}"
+      Readme::Metrics.logger.warn "processing response"
+      Readme::Metrics.logger.warn "#{env}"
       request = HttpRequest.new(env)
       har = Har::Serializer.new(request, response, start_time, end_time, @filter)
-      @@logger.warn "#{har}"
+      Readme::Metrics.logger.warn "#{har}"
       user_info = @get_user_info.call(env)
-      @@logger.warn "#{user_info}"
+      Readme::Metrics.logger.warn "#{user_info}"
       ip = env['REMOTE_ADDR']
-      @@logger.warn "#{ip}"
+      Readme::Metrics.logger.warn "#{ip}"
 
       if !user_info_valid?(user_info)
         Readme::Metrics.logger.warn Errors.bad_block_message(user_info)
