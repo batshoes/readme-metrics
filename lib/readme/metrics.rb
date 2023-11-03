@@ -40,14 +40,14 @@ module Readme
     end
 
     def call(env)
-      logger.warn "Beginning Call method"
+      @@logger.warn "Beginning Call method"
       start_time = Time.now
       status, headers, body = @app.call(env)
       end_time = Time.now
 
       begin
         response = HttpResponse.from_parts(status, headers, body)
-        # logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
+        @@logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
 
         process_response(
           response: response,
@@ -55,9 +55,12 @@ module Readme
           start_time: start_time,
           end_time: end_time
         )
+        @@logger.warn "Processed Response"
       rescue => e
+        @@logger.warn "Beginning Rescue"
         Readme::Metrics.logger.warn "The following error occured when trying to log to the ReadMe metrics API: #{e.message}. Request not logged."
         [status, headers, body]
+        @@logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
       end
 
       [status, headers, body]
@@ -66,11 +69,15 @@ module Readme
     private
 
     def process_response(response:, env:, start_time:, end_time:)
-      logger.warn "processing response"
+      @@logger.warn "processing response"
+      @@logger.warn "#{env}"
       request = HttpRequest.new(env)
       har = Har::Serializer.new(request, response, start_time, end_time, @filter)
+      @@logger.warn "#{har}"
       user_info = @get_user_info.call(env)
+      @@logger.warn "#{user_info}"
       ip = env['REMOTE_ADDR']
+      @@logger.warn "#{ip}"
 
       if !user_info_valid?(user_info)
         Readme::Metrics.logger.warn Errors.bad_block_message(user_info)
@@ -79,28 +86,35 @@ module Readme
       elsif !can_filter? request, response
         Readme::Metrics.logger.warn "Request or response body MIME type isn't supported for filtering. Omitting request from ReadMe API logging"
       else
+        Readme::Metrics.logger.warn "Payload accepted"
         payload = Payload.new(har, user_info, ip, development: @development)
         @@request_queue.push(payload.to_json) unless payload.ignore
       end
     end
 
     def can_filter?(request, response)
+      Readme::Metrics.logger.warn "Can Filter"
       @filter.pass_through? || can_parse_bodies?(request, response)
     end
 
     def can_parse_bodies?(request, response)
+      Readme::Metrics.logger.warn "Can Parse Bodies"
       parseable_request?(request) && parseable_response?(response)
     end
 
     def parseable_response?(response)
+      Readme::Metrics.logger.warn "Parseable Response"
       response.body.empty? || response.json?
     end
 
     def parseable_request?(request)
+      Readme::Metrics.logger.warn "Parseable Request"
       request.body.empty? || request.json? || request.form_data?
     end
 
     def validate_options(options)
+      Readme::Metrics.logger.warn "Validate options #{options}"
+
       raise Errors::ConfigurationError, Errors::API_KEY_ERROR if options[:api_key].nil?
 
       if options[:reject_params]&.any? { |param| !param.is_a? String }
@@ -122,6 +136,7 @@ module Readme
       if options[:logger] && logger_inferface?(options[:logger])
         raise Errors::ConfigurationError, Errors::LOGGER_ERROR
       end
+      Readme::Metrics.logger.warn "Valid options!"
     end
 
     def logger_inferface?(logger)
