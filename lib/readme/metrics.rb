@@ -47,7 +47,10 @@ module Readme
 
       begin
         response = HttpResponse.from_parts(status, headers, body)
-        @@logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
+        @@logger.warn "status: #{status}"
+        @@logger.warn "headers: #{headers}"
+        @@logger.warn "body: #{body}"
+
 
         process_response(
           response: response,
@@ -60,7 +63,9 @@ module Readme
         @@logger.warn "Beginning Rescue"
         Readme::Metrics.logger.warn "The following error occured when trying to log to the ReadMe metrics API: #{e.message}. Request not logged."
         [status, headers, body]
-        @@logger.warn "#{@writer} < @writer variable #{status} #{headers} #{body}"
+        @@logger.warn "status: #{status}"
+        @@logger.warn "headers: #{headers}"
+        @@logger.warn "body: #{body}"
       end
 
       [status, headers, body]
