@@ -36,15 +36,19 @@ module Readme
       buffer_length = options[:buffer_length] || DEFAULT_BUFFER_LENGTH
       @@request_queue = options[:request_queue] || Readme::RequestQueue.new(options[:api_key], buffer_length)
       @@logger = options[:logger] || Logger.new($stdout)
+      @@logger.warn "registered Logger"
     end
 
     def call(env)
+      logger.warn "Beginning Call method"
       start_time = Time.now
       status, headers, body = @app.call(env)
       end_time = Time.now
 
       begin
         response = HttpResponse.from_parts(status, headers, body)
+        logger.warn "#{@writer} < @writer variable #{status, headers, body}"
+
         process_response(
           response: response,
           env: env,
@@ -62,6 +66,7 @@ module Readme
     private
 
     def process_response(response:, env:, start_time:, end_time:)
+      logger.warn "processing response"
       request = HttpRequest.new(env)
       har = Har::Serializer.new(request, response, start_time, end_time, @filter)
       user_info = @get_user_info.call(env)
