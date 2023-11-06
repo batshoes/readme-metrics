@@ -10,6 +10,7 @@ require 'readme/http_request'
 require 'readme/http_response'
 require 'httparty'
 require 'logger'
+require 'pry'
 
 module Readme
   class Metrics
@@ -22,6 +23,7 @@ module Readme
     end
 
     def initialize(app, options, &get_user_info)
+      @@logger = options[:logger] || Logger.new($stdout)
       validate_options(options)
       raise Errors::ConfigurationError, Errors::MISSING_BLOCK_ERROR if get_user_info.nil?
 
@@ -35,7 +37,7 @@ module Readme
 
       buffer_length = options[:buffer_length] || DEFAULT_BUFFER_LENGTH
       @@request_queue = options[:request_queue] || Readme::RequestQueue.new(options[:api_key], buffer_length)
-      @@logger = options[:logger] || Logger.new($stdout)
+      
       Readme::Metrics.logger.warn "registered Logger"
     end
 
