@@ -93,9 +93,12 @@ module Readme
       elsif !can_filter? request, response
         Readme::Metrics.logger.warn "Request or response body MIME type isn't supported for filtering. Omitting request from ReadMe API logging"
       else
-        Readme::Metrics.logger.warn "Payload accepted"
+        Readme::Metrics.logger.warn "development: #{@development}"
         payload = Payload.new(har, user_info, ip, development: @development)
+        Readme::Metrics.logger.warn "payload: #{@payload.inspect}"
+        Readme::Metrics.logger.warn "Payload.ignore? #{payload.ignore}"
         @@request_queue.push(payload.to_json) unless payload.ignore
+        Readme::Metrics.logger.warn "Payload accepted"
       end
     end
 
