@@ -26,11 +26,11 @@ module Readme
 
     def to_json(*_args)
       Readme::Metrics.logger.warn "to_json Initialized"
-      Readme::Metrics.logger.warn "Validated _id: #{_id: validate_uuid(@log_id) ? @log_id : @uuid}"
-      Readme::Metrics.logger.warn "Validated group: #{group: @user_info}"
-      Readme::Metrics.logger.warn "Validated clientIPAddress: #{clientIPAddress: @ip_address}"
-      Readme::Metrics.logger.warn "Validated development: #{development: @development}"
-      Readme::Metrics.logger.warn "Validated request: #{: JSON.parse(@har.to_json)}"
+      Readme::Metrics.logger.warn "Validated _id: #{ validate_uuid(@log_id) ? @log_id : @uuid}"
+      Readme::Metrics.logger.warn "Validated group: #{ @user_info}"
+      Readme::Metrics.logger.warn "Validated clientIPAddress: #{ @ip_address}"
+      Readme::Metrics.logger.warn "Validated development: #{ @development}"
+      Readme::Metrics.logger.warn "Validated request: #{ JSON.parse(@har.to_json)}"
       json = {
         _id: validate_uuid(@log_id) ? @log_id : @uuid,
         group: @user_info,
