@@ -30,6 +30,7 @@ module Readme
       Readme::Metrics.logger.warn "Validated group: #{ @user_info}"
       Readme::Metrics.logger.warn "Validated clientIPAddress: #{ @ip_address}"
       Readme::Metrics.logger.warn "Validated development: #{ @development}"
+      Readme::Metrics.logger.warn "Validated har: #{@har.inspect}"
       Readme::Metrics.logger.warn "Validated request: #{ JSON.parse(@har.to_json)}"
       json = {
         _id: validate_uuid(@log_id) ? @log_id : @uuid,
